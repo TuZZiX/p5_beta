@@ -27,9 +27,9 @@ private:
     //constants and parameters: changeable via public "set" fncs
     double dt_;
     double accel_max_;
-    double alpha_max_;
+    double alpha_max_;  // zui da jiao jia su du
     double speed_max_;
-    double omega_max_;
+    double omega_max_;  // zui da  jiao su du
     double path_move_tol_;
 
     //member vars of class

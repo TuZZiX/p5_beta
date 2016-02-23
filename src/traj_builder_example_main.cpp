@@ -1,6 +1,5 @@
 #include <traj_builder/traj_builder.h> //has almost all the headers we need
 #include <std_msgs/Float64.h>
-#include <nav_msgs/Odometry.h>
 
 //global vars, equivalent to member vars of class
 geometry_msgs::Twist g_halt_twist;
@@ -26,7 +25,7 @@ void do_inits() { //similar to a constructor
 }
 
 int main(int argc, char **argv) {
-    ros::init(argc, argv, "des_state_publisher");
+    ros::init(argc, argv, "traj_builder_test");
     ros::NodeHandle n;
     double dt = 0.02;
     //will stream (publish) desired states to this topic with this message type:
