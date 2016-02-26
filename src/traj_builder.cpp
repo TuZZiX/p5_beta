@@ -49,6 +49,13 @@ TrajBuilder::TrajBuilder()  {
     halt_twist_.angular.x = 0.0;
     halt_twist_.angular.y = 0.0;
     halt_twist_.angular.z = 0.0;
+
+    current_twist_.linear.x = 0.0;
+    current_twist_.linear.y = 0.0;
+    current_twist_.linear.z = 0.0;
+    current_twist_.angular.x = 0.0;
+    current_twist_.angular.y = 0.0;
+    current_twist_.angular.z = 0.0;
 }
 
 //fnc to choose shortest angular distance for motion dang, considering periodicity
@@ -132,6 +139,7 @@ void TrajBuilder::build_trapezoidal_spin_traj(geometry_msgs::PoseStamped start_p
     des_state.header = start_pose.header; //really, want to copy the frame_id
     des_state.pose.pose = start_pose.pose; //start from here
     des_state.twist.twist = halt_twist_; // insist on starting from rest
+    current_twist_ = des_state.twist.twist;     //save current twist for break
     
     //ramp up omega (positive or negative);
     double t = 0.0;
@@ -142,6 +150,7 @@ void TrajBuilder::build_trapezoidal_spin_traj(geometry_msgs::PoseStamped start_p
         t += dt_;
         omega_des = accel*t;
         des_state.twist.twist.angular.z = omega_des; //update rotation rate
+        current_twist_ = des_state.twist.twist;     //save current twist for break
         //update orientation
         psi_des = psi_start + 0.5 * accel * t*t;
         des_state.pose.pose.orientation = convertPlanarPsi2Quaternion(psi_des);
@@ -150,6 +159,7 @@ void TrajBuilder::build_trapezoidal_spin_traj(geometry_msgs::PoseStamped start_p
     //now cruise for distance cruise_distance at const omega
     omega_des = sgn(dpsi)*omega_max_;
     des_state.twist.twist.angular.z  = sgn(dpsi)*omega_max_;
+    current_twist_ = des_state.twist.twist;     //save current twist for break
     double t_cruise = cruise_distance / omega_max_;
     int npts_cruise = round(t_cruise / dt_);
     for (int i = 0; i < npts_cruise; i++) {
@@ -162,6 +172,7 @@ void TrajBuilder::build_trapezoidal_spin_traj(geometry_msgs::PoseStamped start_p
     for (int i = 0; i < npts_ramp; i++) {
         omega_des -= accel*dt_; //Euler one-step integration
         des_state.twist.twist.angular.z = omega_des;
+        current_twist_ = des_state.twist.twist;     //save current twist for break
         psi_des += omega_des*dt_; //Euler one-step integration
         des_state.pose.pose.orientation = convertPlanarPsi2Quaternion(psi_des);
         vec_of_states.push_back(des_state);
@@ -169,6 +180,7 @@ void TrajBuilder::build_trapezoidal_spin_traj(geometry_msgs::PoseStamped start_p
     //make sure the last state is precisely where desired, and at rest:
     des_state.pose.pose = end_pose.pose; //
     des_state.twist.twist = halt_twist_; // insist on full stop
+    current_twist_ = des_state.twist.twist;     //save current twist for break
     vec_of_states.push_back(des_state);
 }
 
@@ -246,11 +258,13 @@ void TrajBuilder::build_trapezoidal_travel_traj(geometry_msgs::PoseStamped start
     des_state.header = start_pose.header; //really, want to copy the frame_id
     des_state.pose.pose = start_pose.pose; //start from here
     des_state.twist.twist = halt_twist_; // insist on starting from rest
+    current_twist_ = des_state.twist.twist;     //save current twist for break
     int npts_ramp = round(t_ramp / dt_);
     double x_des = x_start; //start from here
     double y_des = y_start;
     double speed_des = 0.0;
     des_state.twist.twist.angular.z = 0.0; //omega_des; will not change
+    current_twist_ = des_state.twist.twist;     //save current twist for break
     des_state.pose.pose.orientation = convertPlanarPsi2Quaternion(psi_des); //constant
     // orientation of des_state will not change; only position and twist
     
@@ -260,6 +274,7 @@ void TrajBuilder::build_trapezoidal_travel_traj(geometry_msgs::PoseStamped start
         t += dt_;
         speed_des = accel_max_*t;
         des_state.twist.twist.linear.x = speed_des; //update speed
+        current_twist_ = des_state.twist.twist;     //save current twist for break
         //update positions
         x_des = x_start + 0.5 * accel_max_ * t * t * cos(psi_des);
         y_des = y_start + 0.5 * accel_max_ * t * t * sin(psi_des);
@@ -270,6 +285,7 @@ void TrajBuilder::build_trapezoidal_travel_traj(geometry_msgs::PoseStamped start
     //now cruise for distance cruise_distance at const speed
     speed_des = speed_max_;
     des_state.twist.twist.linear.x = speed_des;
+    current_twist_ = des_state.twist.twist;     //save current twist for break
     double t_cruise = cruise_distance / speed_max_;
     int npts_cruise = round(t_cruise / dt_);
     ROS_INFO("t_cruise = %f; npts_cruise = %d",t_cruise,npts_cruise);
@@ -285,6 +301,7 @@ void TrajBuilder::build_trapezoidal_travel_traj(geometry_msgs::PoseStamped start
     for (int i = 0; i < npts_ramp; i++) {
         speed_des -= accel_max_*dt_; //Euler one-step integration
         des_state.twist.twist.linear.x = speed_des;
+        current_twist_ = des_state.twist.twist;     //save current twist for break
         x_des += speed_des * dt_ * cos(psi_des); //Euler one-step integration
         y_des += speed_des * dt_ * sin(psi_des); //Euler one-step integration        
         des_state.pose.pose.position.x = x_des;
@@ -296,6 +313,7 @@ void TrajBuilder::build_trapezoidal_travel_traj(geometry_msgs::PoseStamped start
     //but final orientation will follow from point-and-go direction
     des_state.pose.pose.orientation = convertPlanarPsi2Quaternion(psi_des);
     des_state.twist.twist = halt_twist_; // insist on starting from rest
+    current_twist_ = des_state.twist.twist;     //save current twist for break
     vec_of_states.push_back(des_state);
 }
 
@@ -315,6 +333,7 @@ void TrajBuilder::build_triangular_travel_traj(geometry_msgs::PoseStamped start_
     des_state.header = start_pose.header; //really, want to copy the frame_id
     des_state.pose.pose = start_pose.pose; //start from here
     des_state.twist.twist = halt_twist_; // insist on starting from rest
+    current_twist_ = des_state.twist.twist;     //save current twist for break
     double trip_len = sqrt(dx * dx + dy * dy);
     double t_ramp = sqrt(trip_len / accel_max_);
     int npts_ramp = round(t_ramp / dt_);
@@ -325,6 +344,7 @@ void TrajBuilder::build_triangular_travel_traj(geometry_msgs::PoseStamped start_
     double y_des = y_start;
     double speed_des = 0.0;
     des_state.twist.twist.angular.z = 0.0; //omega_des; will not change
+    current_twist_ = des_state.twist.twist;     //save current twist for break
     des_state.pose.pose.orientation = convertPlanarPsi2Quaternion(psi_des); //constant
     // orientation of des_state will not change; only position and twist
     double t = 0.0;
@@ -333,6 +353,7 @@ void TrajBuilder::build_triangular_travel_traj(geometry_msgs::PoseStamped start_
         t += dt_;
         speed_des = accel_max_*t;
         des_state.twist.twist.linear.x = speed_des; //update speed
+        current_twist_ = des_state.twist.twist;     //save current twist for break
         //update positions
         x_des = x_start + 0.5 * accel_max_ * t * t * cos(psi_des);
         y_des = y_start + 0.5 * accel_max_ * t * t * sin(psi_des);
@@ -344,6 +365,7 @@ void TrajBuilder::build_triangular_travel_traj(geometry_msgs::PoseStamped start_
     for (int i = 0; i < npts_ramp; i++) {
         speed_des -= accel_max_*dt_; //Euler one-step integration
         des_state.twist.twist.linear.x = speed_des;
+        current_twist_ = des_state.twist.twist;     //save current twist for break
         x_des += speed_des * dt_ * cos(psi_des); //Euler one-step integration
         y_des += speed_des * dt_ * sin(psi_des); //Euler one-step integration        
         des_state.pose.pose.position.x = x_des;
@@ -355,6 +377,7 @@ void TrajBuilder::build_triangular_travel_traj(geometry_msgs::PoseStamped start_
     //but final orientation will follow from point-and-go direction
     des_state.pose.pose.orientation = convertPlanarPsi2Quaternion(psi_des);
     des_state.twist.twist = halt_twist_; // insist on starting from rest
+    current_twist_ = des_state.twist.twist;     //save current twist for break
     vec_of_states.push_back(des_state);
 }
 
@@ -365,6 +388,7 @@ void TrajBuilder::build_triangular_spin_traj(geometry_msgs::PoseStamped start_po
     des_state.header = start_pose.header; //really, want to copy the frame_id
     des_state.pose.pose = start_pose.pose; //start from here
     des_state.twist.twist = halt_twist_; // insist on starting from rest
+    current_twist_ = des_state.twist.twist;     //save current twist for break
     vec_of_states.push_back(des_state);
     double psi_start = convertPlanarQuat2Psi(start_pose.pose.orientation);
     double psi_end = convertPlanarQuat2Psi(end_pose.pose.orientation);
@@ -382,6 +406,7 @@ void TrajBuilder::build_triangular_spin_traj(geometry_msgs::PoseStamped start_po
         t += dt_;
         omega_des = accel*t;
         des_state.twist.twist.angular.z = omega_des; //update rotation rate
+        current_twist_ = des_state.twist.twist;     //save current twist for break
         //update orientation
         psi_des = psi_start + 0.5 * accel * t*t;
         des_state.pose.pose.orientation = convertPlanarPsi2Quaternion(psi_des);
@@ -391,6 +416,7 @@ void TrajBuilder::build_triangular_spin_traj(geometry_msgs::PoseStamped start_po
     for (int i = 0; i < npts_ramp; i++) {
         omega_des -= accel*dt_; //Euler one-step integration
         des_state.twist.twist.angular.z = omega_des;
+        current_twist_ = des_state.twist.twist;     //save current twist for break
         psi_des += omega_des*dt_; //Euler one-step integration
         des_state.pose.pose.orientation = convertPlanarPsi2Quaternion(psi_des);
         vec_of_states.push_back(des_state);
@@ -398,6 +424,7 @@ void TrajBuilder::build_triangular_spin_traj(geometry_msgs::PoseStamped start_po
     //make sure the last state is precisely where requested, and at rest:
     des_state.pose.pose = end_pose.pose; //start from here
     des_state.twist.twist = halt_twist_; // insist on starting from rest
+    current_twist_ = des_state.twist.twist;     //save current twist for break
     vec_of_states.push_back(des_state);
 }
 
@@ -405,8 +432,40 @@ void TrajBuilder::build_triangular_spin_traj(geometry_msgs::PoseStamped start_po
 //compute trajectory corresponding to applying max prudent decel to halt
 void TrajBuilder::build_braking_traj(geometry_msgs::PoseStamped start_pose,
         std::vector<nav_msgs::Odometry> &vec_of_states) {
-    //FINISH ME!
-
+    double x_start = start_pose.pose.position.x;
+    double y_start = start_pose.pose.position.y;
+    double psi_des = atan2(y_start, x_start);
+    nav_msgs::Odometry des_state;
+    des_state.header = start_pose.header; //really, want to copy the frame_id
+    des_state.pose.pose = start_pose.pose; //start from here
+    des_state.twist.twist = current_twist_; // insist on starting from rest
+    double t_ramp = speed_max_ / accel_max_;
+    //double ramp_up_dist = 0.5 * accel_max_ * t_ramp*t_ramp;
+    int npts_ramp = round(t_ramp / dt_);
+    //double v_peak = -1 * accel_max_*t_ramp; // could consider special cases for reverse motion
+    //double d_vel = alpha_max_*dt_; // incremental velocity changes for ramp-up
+    double x_des = x_start; //start from here
+    double y_des = y_start;
+    double speed_des = 0.0;
+    des_state.pose.pose.orientation = convertPlanarPsi2Quaternion(psi_des); //constant
+    // orientation of des_state will not change; only position and twist
+    double t = 0.0;
+    //ramp down:
+    for (int i = 0; i < npts_ramp; i++) {
+        speed_des -= accel_max_*dt_; //Euler one-step integration
+        des_state.twist.twist.linear.x = speed_des;
+        x_des += speed_des * dt_ * cos(psi_des); //Euler one-step integration
+        y_des += speed_des * dt_ * sin(psi_des); //Euler one-step integration
+        des_state.pose.pose.position.x = x_des;
+        des_state.pose.pose.position.y = y_des;
+        vec_of_states.push_back(des_state);
+    }
+    //make sure the last state is precisely where requested, and at rest:
+    //des_state.pose.pose = end_pose.pose;
+    //but final orientation will follow from point-and-go direction
+    des_state.pose.pose.orientation = convertPlanarPsi2Quaternion(psi_des);
+    des_state.twist.twist = halt_twist_; // insist on starting from rest
+    vec_of_states.push_back(des_state);
 
 
 }

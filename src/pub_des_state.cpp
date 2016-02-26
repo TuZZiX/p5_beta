@@ -27,6 +27,7 @@ DesStatePublisher::DesStatePublisher(ros::NodeHandle& nh) : nh_(nh) {
     halt_twist_.angular.x = 0.0;
     halt_twist_.angular.y = 0.0;
     halt_twist_.angular.z = 0.0;
+
     motion_mode_ = DONE_W_SUBGOAL; //init in state ready to process new goal
     e_stop_trigger_ = false; //these are intended to enable e-stop via a service
     e_stop_reset_ = false; //and reset estop
