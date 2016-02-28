@@ -75,7 +75,7 @@ void DesStatePublisher::initializePublishers() {
 
 bool DesStatePublisher::estopServiceCallback(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response) {
     ROS_WARN("estop!!");
-    e_stop_trigger_ = true;
+    e_stop_trigger_ = true; 
 }
 
 bool DesStatePublisher::clearEstopServiceCallback(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response) {
@@ -91,7 +91,7 @@ bool DesStatePublisher::flushPathQueueCB(std_srvs::TriggerRequest& request, std_
     }
 }
 
-bool DesStatePublisher::appendPathQueueCB(mobot_pub_des_state::pathRequest& request, mobot_pub_des_state::pathResponse& response) {
+bool DesStatePublisher::appendPathQueueCB(p5_beta::pathRequest& request, p5_beta::pathResponse& response) {
 
     int npts = request.path.poses.size();
     ROS_INFO("appending path queue with %d points", npts);
@@ -134,7 +134,7 @@ void DesStatePublisher::set_init_pose(double x, double y, double psi) {
 // transition DONE_W_SUBGOAL->PURSUING_SUBGOAL depends on at least one path
 //   point in the queue path_queue_
 // transition PURSUING_SUBGOAL->DONE_W_SUBGOAL occurs when current subgoal has
-//   been reached
+//   been reachedse
 // path queue can be flushed via service flush_path_queue_,
 // or points can be appended to path queue w/ service append_path_
 

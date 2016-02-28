@@ -35,6 +35,7 @@ cs_add_executable(des_state_subscriber src/open_loop_controller.cpp)
 cs_add_executable(append_path_client src/pub_des_state_path_client.cpp)
 cs_add_executable(lidar_braker src/lidar_detector.cpp)
 
+
 #the following is required, if desire to link a node in this package with a library created in this same package
 # edit the arguments to reference the named node and named library within this package
 target_link_libraries(traj_builder_test traj_builder_ps5)
