@@ -39,6 +39,16 @@ DesStatePublisher::DesStatePublisher(ros::NodeHandle& nh) : nh_(nh) {
     halt_state_ = current_des_state_;
     seg_start_state_ = current_des_state_;
     seg_end_state_ = current_des_state_;
+    lidar_alarm_ = false;
+    opt_dir_ = 0;
+    is_alarmed_ = false;
+
+    current_twist_.linear.x = 0.0;
+    current_twist_.linear.y = 0.0;
+    current_twist_.linear.z = 0.0;
+    current_twist_.angular.x = 0.0;
+    current_twist_.angular.y = 0.0;
+    current_twist_.angular.z = 0.0;
 }
 
 void DesStatePublisher::initializeServices() {
@@ -51,7 +61,8 @@ void DesStatePublisher::initializeServices() {
             &DesStatePublisher::flushPathQueueCB, this);
     append_path_ = nh_.advertiseService("append_path_queue_service",
             &DesStatePublisher::appendPathQueueCB, this);
-    
+    alarm_subscriber_ = nh_.subscribe("lidar_alarm", 1, &DesStatePublisher::alarmCB, this);
+    direction_subscriber_ = nh_.subscribe("opt_direction", 1, &DesStatePublisher::directionCB, this);
 }
 
 //member helper function to set up publishers;
@@ -88,6 +99,24 @@ bool DesStatePublisher::appendPathQueueCB(mobot_pub_des_state::pathRequest& requ
         path_queue_.push(request.path.poses[i]);
 }
 
+void DesStatePublisher::alarmCB(const std_msgs::Bool& alarm_msg)
+{
+    lidar_alarm_ = alarm_msg.data;
+    if (lidar_alarm_) {
+        if (!is_alarmed_) {
+            is_alarmed_ = true;
+            e_stop_trigger_ = true;
+        }
+    } else {
+        if (is_alarmed_) {
+            e_stop_trigger_ = true;
+            is_alarmed_ = false;
+        }
+    }
+}
+void DesStatePublisher::directionCB(const std_msgs::Float64& direction_msg) {
+    opt_dir_ = direction_msg.data;
+}
 void DesStatePublisher::set_init_pose(double x, double y, double psi) {
     current_pose_ = trajBuilder_.xyPsi2PoseStamped(x, y, psi);
 }
@@ -118,7 +147,7 @@ void DesStatePublisher::pub_next_state() {
     if (e_stop_trigger_) {
         e_stop_trigger_ = false; //reset trigger
         //compute a halt trajectory
-        trajBuilder_.build_braking_traj(current_pose_, des_state_vec_);
+        trajBuilder_.build_braking_traj(current_pose_, des_state_vec_, current_twist_);
         motion_mode_ = HALTING;
         traj_pt_i_ = 0;
         npts_traj_ = des_state_vec_.size();
@@ -172,6 +201,7 @@ void DesStatePublisher::pub_next_state() {
             current_des_state_ = des_state_vec_[traj_pt_i_];
             current_pose_.pose = current_des_state_.pose.pose;
             current_des_state_.header.stamp = ros::Time::now();
+            current_twist_ = current_des_state_.twist.twist;     //save current twist for break
             desired_state_publisher_.publish(current_des_state_);
             //next three lines just for convenience--convert to heading and publish
             // for rqt_plot visualization            
@@ -183,6 +213,7 @@ void DesStatePublisher::pub_next_state() {
             if (traj_pt_i_ >= npts_traj_) {
                 motion_mode_ = DONE_W_SUBGOAL; //if so, indicate we are done
                 seg_end_state_ = des_state_vec_.back(); // last state of traj
+                current_twist_ = seg_end_state_.twist.twist;     //save current twist for break
                 path_queue_.pop(); // done w/ this subgoal; remove from the queue 
                 ROS_INFO("reached a subgoal: x = %f, y= %f",current_pose_.pose.position.x,
                         current_pose_.pose.position.y);
