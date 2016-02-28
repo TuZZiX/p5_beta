@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find mobot_simulation)/launch/mobot.world"/>
+    <arg name="world_name" value="$(find p5_beta)/launch/mobot.world"/>
   </include>
 
   <include file="$(find mobot_urdf)/launch/mobot_w_lidar.launch"/>
