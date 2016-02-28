@@ -34,7 +34,6 @@ private:
 
     //member vars of class
     geometry_msgs::Twist halt_twist_;
-    geometry_msgs::Twist current_twist_;
 
 public:
     TrajBuilder(); //constructor
@@ -97,7 +96,7 @@ public:
             geometry_msgs::PoseStamped end_pose,
             std::vector<nav_msgs::Odometry> &vec_of_states);
     void build_braking_traj(geometry_msgs::PoseStamped start_pose,
-            std::vector<nav_msgs::Odometry> &vec_of_states);
+            std::vector<nav_msgs::Odometry> &vec_of_states, geometry_msgs::Twist current_twist);
 
 };
 

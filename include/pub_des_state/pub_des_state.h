@@ -54,7 +54,13 @@ private:
     double alpha_max_; 
     double speed_max_; 
     double omega_max_; 
-    double path_move_tol_; 
+    double path_move_tol_;
+
+    bool lidar_alarm_;
+    bool is_alarmed_;
+    double opt_dir_;
+
+    geometry_msgs::Twist current_twist_;
 
     // some objects to support service and publisher
     ros::ServiceServer estop_service_;
@@ -64,7 +70,10 @@ private:
     
     ros::Publisher desired_state_publisher_;
     ros::Publisher des_psi_publisher_;
-    
+
+    ros::Subscriber alarm_subscriber_;
+    ros::Subscriber direction_subscriber_;
+
     //a trajectory-builder object; 
     TrajBuilder trajBuilder_; 
 
@@ -75,6 +84,8 @@ private:
     bool clearEstopServiceCallback(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
     bool flushPathQueueCB(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response);
     bool appendPathQueueCB(mobot_pub_des_state::pathRequest& request,mobot_pub_des_state::pathResponse& response);
+    void alarmCB(const std_msgs::Bool& alarm_msg);
+    void directionCB(const std_msgs::Float64& direction_msg);
 
 public:
     DesStatePublisher(ros::NodeHandle& nh);//constructor
