@@ -96,16 +96,20 @@ void DesStatePublisher::set_init_pose(double x, double y, double psi) {
 // this will cause a single desired state to be published
 // The state machine advances through modes, including
 // HALTING, E_STOPPED, DONE_W_SUBGOAL, and PURSUING_SUBGOAL
+
 // does PURSUING_SUBGOAL->DONE_W_SUBGOAL->PURSUING_SUBGOAL
 // or HALTING->E_STOPPED->DONE_W_SUBGOAL->PURSUING_SUBGOAL
+
 // transition to HALTING requires triggering an e-stop via service estop_service_
 // transition from HALTING to E_STOPPED occurs with completing of halt trajectory
+
 // transition from E_STOPPED to DONE_W_SUBGOAL requires estop reset via 
 //   service estop_clear_service_
 // transition DONE_W_SUBGOAL->PURSUING_SUBGOAL depends on at least one path
 //   point in the queue path_queue_
 // transition PURSUING_SUBGOAL->DONE_W_SUBGOAL occurs when current subgoal has
 //   been reached
+
 // path queue can be flushed via service flush_path_queue_,
 // or points can be appended to path queue w/ service append_path_
 
@@ -126,6 +130,8 @@ void DesStatePublisher::pub_next_state() {
             ROS_WARN("e-stop reset while not in e-stop mode");
         }
         //OK...want to resume motion from e-stopped mode;
+        //motion_mode_=PURSUING_SUBGOAL;
+
         else {
             motion_mode_ = DONE_W_SUBGOAL; //this will pick up where left off
         }

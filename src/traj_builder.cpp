@@ -275,8 +275,7 @@ void TrajBuilder::build_trapezoidal_travel_traj(geometry_msgs::PoseStamped start
         speed_des = accel_max_*t;
         des_state.twist.twist.linear.x = speed_des; //update speed
         current_twist_ = des_state.twist.twist;     //save current twist for break
-        //update positions
-        x_des = x_start + 0.5 * accel_max_ * t * t * cos(psi_des);
+        //update positionsrcel_max_ * t * t * cos(psi_des);
         y_des = y_start + 0.5 * accel_max_ * t * t * sin(psi_des);
         des_state.pose.pose.position.x = x_des;
         des_state.pose.pose.position.y = y_des;
