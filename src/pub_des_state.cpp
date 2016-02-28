@@ -109,7 +109,7 @@ void DesStatePublisher::alarmCB(const std_msgs::Bool& alarm_msg)
         }
     } else {
         if (is_alarmed_) {
-            e_stop_trigger_ = true;
+            e_stop_reset_ = true;
             is_alarmed_ = false;
         }
     }

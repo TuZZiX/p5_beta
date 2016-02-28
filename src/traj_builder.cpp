@@ -405,7 +405,7 @@ void TrajBuilder::build_triangular_spin_traj(geometry_msgs::PoseStamped start_po
 //compute trajectory corresponding to applying max prudent decel to halt
 void TrajBuilder::build_braking_traj(geometry_msgs::PoseStamped start_pose,
         std::vector<nav_msgs::Odometry> &vec_of_states, geometry_msgs::Twist current_twist) {
-    ROS_INFO("building stop traj");
+    ROS_INFO("building braking traj");
     double t_ramp, speed_des, omega_des;
     int npts_ramp;
     double x_start = start_pose.pose.position.x;
@@ -427,7 +427,7 @@ void TrajBuilder::build_braking_traj(geometry_msgs::PoseStamped start_pose,
 
     } else */
     if (current_twist.linear.x > path_move_tol_) {
-        ROS_INFO("building moving traj with speed %f", current_twist.linear.x);
+        ROS_INFO("stop from moving with speed %f", current_twist.linear.x);
         // if only in move mode
         speed_des  = des_state.twist.twist.linear.x;
         t_ramp = speed_des / accel_max_;
@@ -445,7 +445,7 @@ void TrajBuilder::build_braking_traj(geometry_msgs::PoseStamped start_pose,
         }
     } else if (current_twist.angular.z > path_move_tol_) {
         // if only in spin mode
-        ROS_INFO("building spinning traj with omega %f", current_twist.angular.z);
+        ROS_INFO("stop from spinning with omega %f", current_twist.angular.z);
         psi_des = convertPlanarQuat2Psi(start_pose.pose.orientation); //start from here
         omega_des = des_state.twist.twist.angular.z; // assumes spin starts from rest;
         t_ramp = omega_des / alpha_max_;
