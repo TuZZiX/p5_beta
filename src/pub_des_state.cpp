@@ -163,7 +163,7 @@ void DesStatePublisher::pub_next_state() {
         //motion_mode_=PURSUING_SUBGOAL;
 
         else {
-            motion_mode_ = DONE_W_SUBGOAL; //this will pick up where left off
+            motion_mode_ =RECOVERING; //this will pick up where left off
         }
     }
     
@@ -239,6 +239,15 @@ void DesStatePublisher::pub_next_state() {
                 // by simply reiterating the last state sent (should have zero vel)
                 desired_state_publisher_.publish(seg_end_state_);
             }
+            break;
+
+        case RECOVERING:
+            start_pose_=current_pose_;
+            end_pose_=path_queue_.front();
+            trajBuilder_.build_point_and_go_traj(start_pose_,end_pose_,des_state_vec_);
+            traj_pt_i_=0;
+            npts_traj_ = des_state_vec_.size();
+            motion_mode_=PURSUING_SUBGOAL;
             break;
 
         default: //this should not happen
