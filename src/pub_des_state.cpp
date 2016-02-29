@@ -157,7 +157,8 @@ void DesStatePublisher::pub_next_state() {
         e_stop_reset_ = false; //reset trigger
         if (motion_mode_ != E_STOPPED) {
             ROS_WARN("e-stop reset while not in e-stop mode");
-            e_stop_reset_ = true;
+            //e_stop_reset_ = true;
+            motion_mode_ = RECOVERING;
         }
         //OK...want to resume motion from e-stopped mode;
         //motion_mode_=PURSUING_SUBGOAL;

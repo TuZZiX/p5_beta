@@ -8,7 +8,7 @@
 
   <node name= "des_state_subscriber" pkg= "p5_beta" type= "des_state_subscriber" output="screen" /> 
   <!--<node name= "des_state_publisher" pkg= "p5_beta" type= "des_state_publisher" output="screen" /> -->
-  <node name= "lidar_braker" pkg= "p5_beta" type= "lidar_braker" output="screen" /> 
+  <node name= "lidar_braker" pkg= "p5_beta" type= "lidar_braker" /> 
 
 </launch>
 	
