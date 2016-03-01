@@ -7,7 +7,7 @@
 #include <std_msgs/Bool.h>              /* boolean message */
 #include <math.h>
 
-const double MIN_SAFE_DISTANCE = 1.2;   /* set alarm if anything is within 0.5m of the front of robot */
+const double MIN_SAFE_DISTANCE = 2.0;   /* set alarm if anything is within 0.5m of the front of robot */
 const double DISTANCE_FILTER = 0.15;
 
 /* these values to be set within the laser callback */

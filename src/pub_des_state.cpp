@@ -85,8 +85,8 @@ bool DesStatePublisher::clearEstopServiceCallback(std_srvs::TriggerRequest& requ
 
 bool DesStatePublisher::flushPathQueueCB(std_srvs::TriggerRequest& request, std_srvs::TriggerResponse& response) {
     ROS_WARN("flushing path queue");
-    while (!path_queue_.empty())
-    {
+    while (!path_queue_.empty()) {
+      ROS_WARN("Popping... %d", (int) path_queue_.size());
         path_queue_.pop();
     }
 }
@@ -216,7 +216,9 @@ void DesStatePublisher::pub_next_state() {
                 motion_mode_ = DONE_W_SUBGOAL; //if so, indicate we are done
                 seg_end_state_ = des_state_vec_.back(); // last state of traj
                 current_twist_ = seg_end_state_.twist.twist;     //save current twist for break
-                path_queue_.pop(); // done w/ this subgoal; remove from the queue 
+                if (!path_queue_.empty()) {
+                	path_queue_.pop(); // done w/ this subgoal; remove from the queue 
+                }
                 ROS_INFO("reached a subgoal: x = %f, y= %f",current_pose_.pose.position.x,
                         current_pose_.pose.position.y);
             }
@@ -243,12 +245,13 @@ void DesStatePublisher::pub_next_state() {
             break;
 
         case RECOVERING:
-            start_pose_=current_pose_;
-            end_pose_=path_queue_.front();
+	  		ROS_WARN("Now recovering");
+            start_pose_ = current_pose_;
+            end_pose_ = path_queue_.front();
             trajBuilder_.build_point_and_go_traj(start_pose_,end_pose_,des_state_vec_);
-            traj_pt_i_=0;
+            traj_pt_i_ = 0;
             npts_traj_ = des_state_vec_.size();
-            motion_mode_=PURSUING_SUBGOAL;
+            motion_mode_ = PURSUING_SUBGOAL;
             break;
 
         default: //this should not happen

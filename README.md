@@ -1,8 +1,46 @@
 # p5_beta
 
-Your description goes here
+Assignment on trajectory planning due at the end of February 2016.  It
+demonstrates the following behaviors:
+
++ graceful halt from LIDAR alarm
++ graceful recovery from LIDAR alarm
++ graceful recovery from wireless E-stop
++ ability to execute open-loop control corresponding to a prescribed
+  polyline path
++ ability to append subgoal poses to a prescribed path plan
++ ability to flush a path plan and replace it
+
+Also included in this submission is two videos, one of the Gazebo
+simulation and the other of the robot trundling around the lab and in
+the hallway.
 
 ## Example usage
 
-## Running tests/demos
-    
+Executing the following Gazebo-based launch file will bring up an
+instance of Gazebo complete with a mobot, a LIDAR obstacle detector,
+and an open-loop controller.  The second command will allow one to use
+the included services, detailed below.
+
+```bash
+$ roslaunch p5_beta load_world_and_controller.launch
+$ rosrun p5_beta des_state_publisher
+```
+
+To send the emergency stop, run `rosservice call /estop_service`.  A
+more complete listing of available service calls can be seen below:
+
+```
+/clear_estop_service
+/estop_service
+/flush_path_queue_service
+```
+
+In addition to these three trigger-based services, there is also a
+fourth that requires an argument.  `/append_path_queue_service` can be
+called from a node.  That node, `append_path_client`, accepts as
+arguments either "flush" or "append x y th", where the last three
+arguments are the desired X, Y, and yaw values.  Multiple such
+triplets can be specified at once, in "x1 y1 th1 x2 y2 th2 ..." order.
+If no arguments beyond the initial "append" are provided, a default
+path tracing out a square will be assumed.
