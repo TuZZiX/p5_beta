@@ -14,6 +14,12 @@ int main(int argc, char **argv) {
         desStatePublisher.append_path_queue(5.0, -11.0, -M_PI/2);
         desStatePublisher.append_path_queue(5.0, -11.0, -M_PI);
         desStatePublisher.append_path_queue(0.0, -11.0, -M_PI);
+    } else if (argc > 1 && ( strcmp(argv[1], "vending") == 0 )) {
+        desStatePublisher.append_path_queue(10.0,  0.0,  0.0);
+        desStatePublisher.append_path_queue(10.0,  0.0,  -M_PI/2);
+        desStatePublisher.append_path_queue(10.0, -9.0, -M_PI/2);
+    } else if (argc > 1 && ( strcmp(argv[1], "test") == 0 )) {
+        desStatePublisher.append_path_queue(0.5,  0.0,  0.0);
     } else {
         desStatePublisher.append_path_queue(5.0,  0.0,  0.0);
         desStatePublisher.append_path_queue(0.0, 0.0, -M_PI);

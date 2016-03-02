@@ -25,6 +25,8 @@ int main(int argc, char** argv) {
     ros::NodeHandle n;
     ros::ServiceClient client = n.serviceClient<p5_beta::path>("append_path_queue_service");
     ros::ServiceClient flush = n.serviceClient<std_srvs::Trigger>("flush_path_queue_service");
+    ros::ServiceClient estop = n.serviceClient<std_srvs::Trigger>("estop_service");
+    ros::ServiceClient clear_estop = n.serviceClient<std_srvs::Trigger>("clear_estop_service");
     geometry_msgs::Quaternion quat;
     std_srvs::Trigger trigger;
     
@@ -39,7 +41,11 @@ int main(int argc, char** argv) {
     if (argc < 2) return 1;
 
     if (!strcmp(argv[1], "flush")) {
-       flush.call(trigger); 
+        flush.call(trigger);
+    } else if (!strcmp(argv[1], "stop")) {
+        estop.call(trigger);
+    } else if (!strcmp(argv[1], "go")) {
+        clear_estop.call(trigger);
     } else if (!strcmp(argv[1], "append")) {
         if (argc == 2) {
             //create some path points...this should be done by some intelligent algorithm, but we'll hard-code it here
@@ -69,6 +75,8 @@ int main(int argc, char** argv) {
             //repeat (x,y) with new heading:
             pose_stamped.pose.orientation = convertPlanarPhi2Quaternion(0); 
             path_srv.request.path.poses.push_back(pose_stamped);
+
+            ROS_INFO("Append goal with %d paths", (int)(path_srv.request.path.poses.size()));
         } else if ((argc - 2) % 3 == 0) {
             int i = 1;
             path_srv.request.path.poses.clear();
