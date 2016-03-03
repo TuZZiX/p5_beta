@@ -96,7 +96,7 @@ void laserCallback(const sensor_msgs::LaserScan& laser_scan) {
  * Removed now-useless distance-in-front thing.
  */
 int main(int argc, char **argv) {
-	if (argc >= 3) {
+	if (argc < 3) {
 		printf("Wrong number of arguments.  Using default values.\n"
 			"Usage: lidar_alarm DIST RAD\n"
 			"  DIST distance in front of robot to check\n"
