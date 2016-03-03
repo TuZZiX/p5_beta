@@ -9,11 +9,14 @@ int main(int argc, char **argv) {
     desStatePublisher.set_init_pose(0,0,0); //x=0, y=0, psi=0
     //put some points in the path queue--hard coded here
     if (argc > 1 && ( strcmp(argv[1], "jinx") == 0 )) {
-        desStatePublisher.append_path_queue(5.5,  0.0,  0.0);
-        desStatePublisher.append_path_queue(5.0,  0.0,  -M_PI/2);
-        desStatePublisher.append_path_queue(5.0, -11.0, -M_PI/2);
-        desStatePublisher.append_path_queue(5.0, -11.0, -M_PI);
-        desStatePublisher.append_path_queue(0.0, -11.0, -M_PI);
+        double x = 5.4;
+        double y = -12;
+        double v = 5.8;
+        desStatePublisher.append_path_queue(x,   0.0,  0.0);
+        desStatePublisher.append_path_queue(x,   0.0,  -M_PI/2);
+        desStatePublisher.append_path_queue(x,   y, -M_PI/2);
+        desStatePublisher.append_path_queue(x,   y, M_PI);
+        desStatePublisher.append_path_queue(x-v, y, M_PI);
     } else if (argc > 1 && ( strcmp(argv[1], "vending") == 0 )) {
         desStatePublisher.append_path_queue(10.0,  0.0,  0.0);
         desStatePublisher.append_path_queue(10.0,  0.0,  -M_PI/2);
