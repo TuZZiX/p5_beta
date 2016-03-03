@@ -17,15 +17,7 @@ the hallway.
 
 ## Example usage
 
-Executing the following Gazebo-based launch file will bring up an
-instance of Gazebo complete with a mobot, a LIDAR obstacle detector,
-and an open-loop controller.  The second command will allow one to use
-the included services, detailed below.
-
-```bash
-$ roslaunch p5_beta load_world_and_controller.launch
-$ rosrun p5_beta des_state_publisher
-```
+### General
 
 To send the emergency stop, run `rosservice call /estop_service`.  A
 more complete listing of available service calls can be seen below:
@@ -44,3 +36,25 @@ arguments are the desired X, Y, and yaw values.  Multiple such
 triplets can be specified at once, in "x1 y1 th1 x2 y2 th2 ..." order.
 If no arguments beyond the initial "append" are provided, a default
 path tracing out a square will be assumed.
+
+### Gazebo Specific
+
+Executing the following Gazebo-based launch file will bring up an
+instance of Gazebo complete with a mobot, a LIDAR obstacle detector,
+and an open-loop controller.  The second command will allow one to use
+the included services, detailed below.
+
+```bash
+$ roslaunch p5_beta load_world_and_controller.launch
+$ rosrun p5_beta des_state_publisher
+```
+
+### Jinx Specific
+
+Executing the following launch file will start 
+
+```bash
+$ roslaunch p5_beta jinx_controller.launch
+$ rosrun p5_beta des_state_publisher
+```
+
