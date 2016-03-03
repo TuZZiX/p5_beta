@@ -1,6 +1,6 @@
 # p5_beta
 
-Assignment on trajectory planning due at the end of February 2016.  It
+Assignment on trajectory planning for PS5 and PS6.  It
 demonstrates the following behaviors:
 
 + graceful halt from LIDAR alarm
@@ -11,9 +11,8 @@ demonstrates the following behaviors:
 + ability to append subgoal poses to a prescribed path plan
 + ability to flush a path plan and replace it
 
-Also included in this submission is two videos, one of the Gazebo
-simulation and the other of the robot trundling around the lab and in
-the hallway.
+Also included in this submission is three videos, one of the Gazebo
+simulation, one of the robot running on ruler, the other of the robot trundling from the lab hallway to the vending machine.
 
 ## Example usage
 
@@ -42,7 +41,7 @@ path tracing out a square will be assumed. `stop` and `clear` are provided as ea
 Executing the following Gazebo-based launch file will bring up an
 instance of Gazebo complete with a mobot, a LIDAR obstacle detector,
 and an open-loop controller.  The second command will allow one to use
-the included services, detailed in the General section.
+the included services, detailed in the General section. The robot will move 5 meters forward and 5 meters backward.
 
 ```
 $ roslaunch p5_beta load_world_and_controller.launch
@@ -52,7 +51,7 @@ $ rosrun p5_beta des_state_publisher
 
 ### Jinx Specific
 
-Executing the following launch file will start the jinx open-loop controller, a LIDAR obstacle detector, and topic re-mapping. The second command will allow one to use the included services, detailed in the General section.
+Executing the following launch file will start the jinx open-loop controller, a LIDAR obstacle detector, and topic re-mapping. The second command will allow one to use the included services, detailed in the General section. The robot will move from the elevator to the vending machine.
 
 ```
 $ roslaunch p5_beta jinx_controller.launch
