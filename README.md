@@ -31,30 +31,32 @@ more complete listing of available service calls can be seen below:
 In addition to these three trigger-based services, there is also a
 fourth that requires an argument.  `/append_path_queue_service` can be
 called from a node.  That node, `append_path_client`, accepts as
-arguments either "flush" or "append x y th", where the last three
+arguments `stop`, `clear`, `flush`, or `append x y th`, where the last three
 arguments are the desired X, Y, and yaw values.  Multiple such
-triplets can be specified at once, in "x1 y1 th1 x2 y2 th2 ..." order.
-If no arguments beyond the initial "append" are provided, a default
-path tracing out a square will be assumed.
+triplets can be specified at once, in `x1 y1 th1 x2 y2 th2 ...` order.
+If no arguments beyond the initial `append` are provided, a default
+path tracing out a square will be assumed. `stop` and `clear` are provided as easy mnemonics for the estop services, and `flush` will clear paths that have not yet been executed.
 
 ### Gazebo Specific
 
 Executing the following Gazebo-based launch file will bring up an
 instance of Gazebo complete with a mobot, a LIDAR obstacle detector,
 and an open-loop controller.  The second command will allow one to use
-the included services, detailed below.
+the included services, detailed in the General section.
 
-```bash
+```
 $ roslaunch p5_beta load_world_and_controller.launch
 $ rosrun p5_beta des_state_publisher
 ```
 
+
 ### Jinx Specific
 
-Executing the following launch file will start 
+Executing the following launch file will start the jinx open-loop controller, a LIDAR obstacle detector, and topic re-mapping. The second command will allow one to use the included services, detailed in the General section.
 
-```bash
-$ roslaunch p5_beta jinx_controller.launch
-$ rosrun p5_beta des_state_publisher
 ```
+$ roslaunch p5_beta jinx_controller.launch
+$ rosrun p5_beta des_state_publisher jinx
+```
+
 

@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     } else if (!strcmp(argv[1], "stop")) {
     	ROS_INFO("E-stop engaged");
         estop.call(trigger);
-    } else if (!strcmp(argv[1], "go")) {
+    } else if (!strcmp(argv[1], "clear")) {
     	ROS_INFO("E-stop released");
         clear_estop.call(trigger);
     } else if (!strcmp(argv[1], "append")) {
