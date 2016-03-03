@@ -201,35 +201,22 @@ void DesStatePublisher::pub_next_state() {
         case PURSUING_SUBGOAL: //if have remaining pts in computed traj, send them
             //extract the i'th point of our plan:
             current_des_state_ = des_state_vec_[traj_pt_i_];
-            ROS_WARN("flag5");
             current_pose_.pose = current_des_state_.pose.pose;
-            ROS_WARN("flag6");
             current_des_state_.header.stamp = ros::Time::now();
-            ROS_WARN("flag7");
             current_twist_ = current_des_state_.twist.twist;     //save current twist for break
-            ROS_WARN("flag8");
             desired_state_publisher_.publish(current_des_state_);
-            ROS_WARN("flag9");
             //next three lines just for convenience--convert to heading and publish
             // for rqt_plot visualization            
             des_psi_ = trajBuilder_.convertPlanarQuat2Psi(current_pose_.pose.orientation);
-            ROS_WARN("flag10");
             float_msg_.data = des_psi_;
-            ROS_WARN("flag11");
             des_psi_publisher_.publish(float_msg_);
-            ROS_WARN("flag12");
             traj_pt_i_++; // increment counter to prep for next point of plan
-            ROS_WARN("flag13");
             //check if we have clocked out all of our planned states:
             if (traj_pt_i_ >= npts_traj_) {
                 motion_mode_ = DONE_W_SUBGOAL; //if so, indicate we are done
-                ROS_WARN("flag14");
                 seg_end_state_ = des_state_vec_.back(); // last state of traj
-                ROS_WARN("flag15");
                 current_twist_ = seg_end_state_.twist.twist;     //save current twist for break
-                ROS_WARN("flag16");
                 if (!path_queue_.empty()) {
-                    ROS_WARN("flag17");
                 	path_queue_.pop(); // done w/ this subgoal; remove from the queue 
                 }
                 ROS_INFO("reached a subgoal: x = %f, y= %f",current_pose_.pose.position.x,
@@ -258,17 +245,20 @@ void DesStatePublisher::pub_next_state() {
             break;
 
         case RECOVERING:
-	  		ROS_WARN("Now recovering");
-            start_pose_ = current_pose_;
-            ROS_WARN("flag1");
-            end_pose_ = path_queue_.front();
-            ROS_WARN("flag2");
-            trajBuilder_.build_point_and_go_traj(start_pose_,end_pose_,des_state_vec_);
-            ROS_WARN("flag3");
-            traj_pt_i_ = 0;
-            npts_traj_ = des_state_vec_.size();
-            ROS_WARN("flag4");
-            motion_mode_ = PURSUING_SUBGOAL;
+	  		//ROS_WARN("Now recovering");
+            //start_pose_ = current_pose_;
+            if (!path_queue_.empty()) {
+                ROS_WARN("Now recovering");
+                start_pose_ = current_pose_;
+                end_pose_ = path_queue_.front();
+                trajBuilder_.build_point_and_go_traj(start_pose_,end_pose_,des_state_vec_);
+                traj_pt_i_ = 0;
+                npts_traj_ = des_state_vec_.size();
+                motion_mode_ = PURSUING_SUBGOAL;
+            }
+            else {
+                motion_mode_ = DONE_W_SUBGOAL;
+            }
             break;
 
         default: //this should not happen
