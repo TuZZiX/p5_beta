@@ -35,16 +35,19 @@ int main(int argc, char** argv) {
       ros::Duration(1.0).sleep();
       ros::spinOnce();
     }
-    ROS_INFO("connected client to service");
+    //ROS_INFO("connected client to service");
     p5_beta::path path_srv;
 
     if (argc < 2) return 1;
 
     if (!strcmp(argv[1], "flush")) {
+    	ROS_INFO("flush current path");
         flush.call(trigger);
     } else if (!strcmp(argv[1], "stop")) {
+    	ROS_INFO("E-stop engaged");
         estop.call(trigger);
     } else if (!strcmp(argv[1], "go")) {
+    	ROS_INFO("E-stop released");
         clear_estop.call(trigger);
     } else if (!strcmp(argv[1], "append")) {
         if (argc == 2) {
@@ -98,7 +101,7 @@ int main(int argc, char** argv) {
         }
         client.call(path_srv);
     } else {
-        ROS_ERROR("Command should be either 'flush' or 'append', received %s", argv[1]);
+        ROS_ERROR("Command should be 'flush' or 'append' or 'stop' or 'go', received %s", argv[1]);
     }
 
     return 0;

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
+	<arg name="dist" default="1.5" />
+	<arg name="rad" default="0.5" />
+
 	<remap from="/base_laser1_scan" to="/scan" />
 	
 	<include file="$(find mobot_urdf)/launch/mobot_w_lidar.launch"/>
