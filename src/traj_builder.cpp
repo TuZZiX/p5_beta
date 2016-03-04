@@ -1,5 +1,7 @@
 #include<traj_builder/traj_builder.h>
 
+int called_build_spin_traj = 0;
+
 //This library contains functions to build simple navigation trajectories.
 //The main function is: build_point_and_go_traj().  This function takes
 // arguments of a start pose, a goal pose, and a reference to a vector of
@@ -53,7 +55,7 @@ TrajBuilder::TrajBuilder()  {
 
 //fnc to choose shortest angular distance for motion dang, considering periodicity
 double TrajBuilder::min_dang(double dang) {
-    while (dang > M_PI) dang -= 2.0 * M_PI;
+    while (dang >= M_PI) dang -= 2.0 * M_PI;
     while (dang < -M_PI) dang += 2.0 * M_PI;
     return dang;
 }
@@ -179,6 +181,9 @@ void TrajBuilder::build_spin_traj(geometry_msgs::PoseStamped start_pose,
         geometry_msgs::PoseStamped end_pose,
         std::vector<nav_msgs::Odometry> &vec_of_states) {
     //decide if triangular or trapezoidal profile:
+
+	ROS_WARN("Called BST %d times", ++called_build_spin_traj);
+
     double x_start = start_pose.pose.position.x;
     double y_start = start_pose.pose.position.y;
     double x_end = end_pose.pose.position.x;
@@ -187,12 +192,15 @@ void TrajBuilder::build_spin_traj(geometry_msgs::PoseStamped start_pose,
     double dy = y_end - y_start;
     double psi_start = convertPlanarQuat2Psi(start_pose.pose.orientation);
     double psi_end = convertPlanarQuat2Psi(end_pose.pose.orientation);
-    double dpsi = min_dang(psi_end - psi_start);
+    double dpsi = fabs(min_dang(psi_end - psi_start));
     ROS_INFO("rotational spin distance = %f", dpsi);
     double ramp_up_time = omega_max_/ alpha_max_;    
     double ramp_up_dist = 0.5 * alpha_max_ * ramp_up_time*ramp_up_time;
     //decide on triangular vs trapezoidal:
-    if (fabs(dpsi) < 2.0 * ramp_up_dist) { //delta-angle is too short for trapezoid
+	// if (dpsi < path_move_tol_) {
+	// 	ROS_INFO("Too little to rotate");
+    // } else
+	if (dpsi < 2.0 * ramp_up_dist) { //delta-angle is too short for trapezoid
         build_triangular_spin_traj(start_pose, end_pose, vec_of_states);
     } else {
         build_trapezoidal_spin_traj(start_pose, end_pose, vec_of_states);
@@ -214,7 +222,9 @@ void TrajBuilder::build_travel_traj(geometry_msgs::PoseStamped start_pose,
     double trip_len = sqrt(dx * dx + dy * dy);
     double ramp_up_dist = 0.5 * speed_max_ * speed_max_ / alpha_max_;
     ROS_INFO("trip len = %f", trip_len);
-    if (trip_len < 2.0 * ramp_up_dist) { //length is too short for trapezoid
+	if (trip_len < path_move_tol_) {
+		ROS_INFO("Too short to translate anywhere");
+    } else if (trip_len < 2.0 * ramp_up_dist) { //length is too short for trapezoid
         build_triangular_travel_traj(start_pose, end_pose, vec_of_states);
     } else {
         build_trapezoidal_travel_traj(start_pose, end_pose, vec_of_states);
