@@ -10,5 +10,5 @@
 	<node name= "des_state_subscriber" pkg= "p5_beta" type= "des_state_subscriber" output="screen" /> 
 	<!--<node name= "des_state_publisher" pkg= "p5_beta" type= "des_state_publisher" output="screen" /> -->
 	<node name= "lidar_braker2" pkg= "p5_beta" type= "lidar_braker2" args="1.0 0.5" output="screen" /> 
-
+	<node name= "slam_gmapping" pkg= "gmapping" type= "slam_gmapping" output="screen" /> 
 </launch>
